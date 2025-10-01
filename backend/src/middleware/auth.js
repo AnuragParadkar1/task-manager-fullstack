@@ -1,51 +1,23 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
-const config = require('../config');
-const logger = require('../utils/logger');
+const { jwtSecret } = require('../config/auth');
 
-const authenticate = async (req, res, next) => {
-  try {
-    const authHeader = req.header('Authorization');
+function authMiddleware(req, res, next) {
+  // Get token from Authorization header: "Bearer <token>"
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
-    if (!authHeader?.startsWith('Bearer ')) {
-      return res.status(401).json({
-        success: false,
-        message: 'Access denied. No valid token provided.',
-      });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, config.JWT_SECRET);
-
-    const user = await User.findByPk(decoded.id);
-    if (!user?.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid token or user not found.',
-      });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    logger.error('Authentication error:', error);
-    res.status(401).json({
-      success: false,
-      message: 'Invalid token.',
-    });
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided. Access denied.' });
   }
-};
 
-const authorize = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Insufficient permissions.',
-      });
-    }
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, jwtSecret);
+    req.user = decoded; // attach decoded payload to req.user
     next();
-  };
-};
+  } catch (err) {
+    return res.status(403).json({ error: 'Invalid or expired token.' });
+  }
+}
 
-module.exports = { authenticate, authorize };
+module.exports = authMiddleware;

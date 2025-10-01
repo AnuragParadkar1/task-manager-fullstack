@@ -1,11 +1,12 @@
-const User = require('./user');
-const Task = require('./Task');
+const { sequelize } = require('../utils/database');
 
-// Define associations
-User.hasMany(Task, { foreignKey: 'userId', as: 'tasks' });
-Task.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+const db = {};
 
-module.exports = {
-  User,
-  Task,
-};
+db.sequelize = sequelize;
+
+// When you create database models like User or Task, you will add them here.
+// For example:
+// db.User = require('./user.js')(sequelize);
+// db.Task = require('./task.js')(sequelize);
+
+module.exports = db;

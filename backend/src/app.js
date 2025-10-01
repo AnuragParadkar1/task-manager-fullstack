@@ -7,7 +7,7 @@ const swaggerSpec = require('./utils/swagger');
 const config = require('./config');
 const logger = require('./utils/logger');
 const { connectDB } = require('./utils/database');
-const routes = require('./routes');
+const routes = require('./routes/v1');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -58,7 +58,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api', routes);
+app.use('/api/v1', routes);
 
 // 404 handler
 app.use('*', (req, res) => {

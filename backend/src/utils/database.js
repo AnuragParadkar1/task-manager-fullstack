@@ -1,37 +1,10 @@
-const { Sequelize } = require('sequelize');
-const config = require('../config'); // CORRECTED PATH
-const logger = require('./logger');
+module.exports = {
+  // Database connection URL from .env file
+  DATABASE_URL: process.env.DATABASE_URL,
 
-const sequelize = new Sequelize(config.DATABASE_URL, {
-  dialect: 'postgres',
-  logging: (msg) => logger.info(msg),
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
-  define: {
-    timestamps: true,
-    underscored: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-  },
-});
+  // Port for the server to run on, with a default of 5000
+  PORT: process.env.PORT || 5000,
 
-const connectDB = async () => {
-  try {
-    await sequelize.authenticate();
-    logger.info('Database connected successfully');
-
-    if (config.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      logger.info('Database synchronized');
-    }
-  } catch (error) {
-    logger.error('Database connection failed:', error);
-    process.exit(1);
-  }
+  // Node environment, with a default of 'development'
+  NODE_ENV: process.env.NODE_ENV || 'development',
 };
-
-module.exports = { sequelize, connectDB };

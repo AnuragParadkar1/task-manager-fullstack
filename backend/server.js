@@ -1,8 +1,16 @@
 require('dotenv').config();
 
-const app = require('./src/app');
-const config = require('./src/config');
+const express = require('express');
+const app = express();
+const { router, ...config } = require('./src/config');
 const logger = require('./src/utils/logger');
+
+// Apply middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Mount router with /api prefix
+app.use('/api', router);
 
 const server = app.listen(config.PORT, () => {
   logger.info(`🚀 Task Manager API running on port ${config.PORT}`);
